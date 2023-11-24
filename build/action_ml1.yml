@@ -1,10 +1,10 @@
-name: 'Build cv'
-description: 'Compile the cv using xelatex'
+name: 'build ml1'
+description: 'compile tex using xelatex'
 inputs:
   filename:
-    description: 'Path to the main .tex file'
+    description: 'path to the main .tex file'
     required: true
-    default: 'src/cv.tex'
+    default: 'src/ml1.tex'
   out_dir:
     description: 'Directory where to put the generated .pdf file'
     required: true
