@@ -1,0 +1,953 @@
+\documentclass[final]{beamer}
+
+% ====================
+% Packages
+% ====================
+
+\usepackage[T1]{fontenc}
+ \usepackage[utf8]{luainputenc}
+\usepackage{lmodern}
+\usepackage[size=custom, width=122,height=91, scale=1.2]{beamerposter}
+\usetheme{gemini}
+\usecolortheme{uoft}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.14}
+\usepackage{anyfontsize}
+\usepackage{ulem}
+\usepackage{cancel}
+\usepackage{tikz}  
+\usetikzlibrary{graphs}
+
+% ====================
+% Lengths
+% ====================
+
+% If you have N columns, choose \sepwidth and \colwidth such that
+% (N+1)*\sepwidth + N*\colwidth = \paperwidth
+\newlength{\sepwidth}
+\newlength{\colwidth}
+\setlength{\sepwidth}{0.003\paperwidth}
+\setlength{\colwidth}{0.24\paperwidth}
+\definecolor{mgr}{RGB}{0,128,0}
+\newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
+
+% ====================
+% Title
+% ====================
+
+\title{\Large Шпаргалка по МО1}
+
+% ====================
+% Footer (optional)
+% ====================
+
+% (can be left out to remove footer)
+
+% ====================
+% Logo (optional)
+% ====================
+
+% use this to include logos on the left and/or right side of the header:
+% Left: institution
+
+% Right: funding agencies and other affilations 
+%\logoright{\includegraphics[height=7cm]{logos/NSF.eps}}
+% ====================
+% Body
+% ====================
+
+\begin{document}
+
+\begin{frame}[t]
+\begin{columns}[t]
+\separatorcolumn
+
+\begin{column}{\colwidth}
+\begin{block}{Линейная регрессия. Функции потерь}
+%\centering
+
+$a(x) = w_0 + \left<w, x\right>, \; x, w \in \mathbb{R}^d$ - {\small лин. модель регрессии}
+\[\textrb{MSE} = \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} \left(a(x_i) - y_i \right)^2\; ; \quad \textrb{RMSE} = \sqrt{\textrb{MSE}}\]
+\[\textrb{R}\limits_{\text{коэфф. детерм.}}^2 = 1 - \frac{\sum\limits_{i = 1}^{\ell} \left(a(x_i) - y_i \right)^2}{\sum\limits_{i = 1}^{\ell} \left(y_i - \overline{y} \right)^2}\]
+{\small для разумных моделей} $\textrb{R}^2 \in (0, 1]$
+\[
+\textrb{MAE} = \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} \left|a(x_i) - y_i \right|
+\]
+$\textrb{MSE}$ - {\small стимулирует подгонку под выборку + по произв. понятна близость к экстремуму}, \\
+$\textrb{MAE}$ - {\small лучше игнорирует выбросы}\\
+\hrulefill
+
+$\textrb{Huber-Loss}$:
+\begin{equation*}
+L_{\delta}(y,z) = 
+ \begin{cases}
+   \frac{1}{2} (y - z)^2 &\text{, $|y - z| < \delta$}\\
+    \delta \left(|y - z| - \frac{1}{2} \delta \right) &\text{, $|y - z| \ge \delta$}
+ \end{cases}
+\end{equation*}
+$\ominus$ {\small вторая произв. разрывна}\\
+\hrulefill
+
+$\textrb{Log-Cosh}$:
+\[L(x, z) = \log \cosh (y-z)\; ; \quad \cosh(x) = \frac{e^{x} + e^{-x}}{2}\]
+$\oplus$ {\small вторая произв. непрерывна}\\
+\hrulefill
+\[\textrb{MSLE}: \; L(y, z) = \left( \log(z + 1) - \log(y + 1)\right)^2 , \; y, z \ge 0\]
+{\small важно, что угадали порядок}\\
+\hrulefill
+\[\textrb{MAPE}\limits_{\textrb{MAE} \text{ с весами}}: \; L(y, z)=  \left| \frac{y - z}{y}\right|\]
+$\oplus$ {\small интерпретируемость (во сколько раз отклонились от правильного ответа)}\\
+$\oplus$ {\small хорошо при разных масштабах } $y$
+\end{block}
+
+\begin{block}{Обобщающая способность. Градиентные методы}
+
+{\small ошибка на новых данных >> ошибки на обучении => переобучение}
+
+{\small Оценка обощающей способности модели:\\
+(1) отложенная выборка\\
+(2) кросс-валидация
+}\\
+\hrulefill
+
+$Q(w_1, ..., w_d) \to \min\limits_{w} \quad$
+{\small пусть } $Q$ {\small дифф.} $\Rightarrow \; \exists \nabla Q(w) $
+
+$\textrb{GD}: \; w^{k} = w^{k - 1} - \eta \nabla Q(w^{k - 1})$\\
+\hrulefill
+
+$Q(w) = \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} q_i(w) \; \Rightarrow \; \nabla Q(w) = \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} \nabla q_i(w)$
+
+$\textrb{SGD}: w^{k} = w^{k - 1} - \eta_{k} \nabla q_{ik}(w^{k - 1})$
+
+$\textrb{mini-batch \; GD}: \; \nabla Q(w) \sim \frac{1}{t}\sum\limits_{j = 1}^{t} \nabla q_{ij}(w)$\\
+\hrulefill
+
+$\textrb{SAG}: \;
+z_i^{0} = \nabla q_i(w^{0}), \quad i_k \sim \{1, ..., \ell\}$
+\begin{equation*}
+z_i^{k} = 
+ \begin{cases}
+   \nabla q_i(w^{k - 1}) &, i = i_k\\
+   z_i^{k - 1} &, i \ne i_k
+ \end{cases}
+\end{equation*}
+$\nabla Q(w^{k-1}) \sim \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} z_i^{k-1}, \quad \quad w^{k} = w^{k-1} - \eta_k \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} z_i^{k-1}$\\
+\hrulefill
+\end{block}
+
+
+
+\end{column}
+\separatorcolumn
+
+\begin{column}{\colwidth}
+\hrulefill
+
+$\textrb{Momentum}: w^{0}$ - {\small иниц.} $h_0 = 0$ - {\small вектор инерции}
+
+$h_k = \alpha h_{k-1} + \eta_k \left(\nabla_w Q(w^{k-1})\right)\limits_{\text{можно заменять на оц. град.}}\\
+w^k = w^{k-1} - h_k$
+
+$\oplus$ {\small борьба с осцилляциями}\\
+\hrulefill
+
+$\textrb{AdaGrad}: G_{0j} = 0, \quad G_{kj} = G_{k-1,j} + \left(\nabla Q(w^{k-1}) \right)_j^2$
+\[w_j^k = w_j^{k-1} - \frac{\eta_k}{\sqrt{G_{kj} +\varepsilon}} \left(\nabla Q(w^{k-1})\right)_j\]
+$\ominus \; G_{kj}$ {\small только растет и может быстро остановить оптимиз.}
+
+$\textrb{RMSProp}: \; G_{kj} = \alpha G_{k-1,j} + (1 - \alpha) \left(\nabla Q(w^{k-1}) \right)_j^2$\\
+\hrulefill
+
+$\textrb{Adam} = \textrb{Momentum} + \textrb{AdaGrad} $
+
+\begin{block}{Регуляризация}
+$fan-fact:$ {\small лин. модель переобучена <=> большие веса}
+
+{\small есть лин. зависимость в данных => решений "беск." много => вероятно веса большие}
+
+{\small большие веса озн. излишнюю чувств-ть к мин. изменениям признаков}
+
+$Q(w) + \alpha\limits_{\text{коэфф. регул.}} R(w) \to \min, \quad R(w)$ - {\small регуляризатор}
+
+$R(w) = ||w||_2 - L_2$ {\small регул.} $ \quad \quad R(w) = ||w||_1 - L_1$ {\small регул.}
+
+$\alpha$ - {\small гиперпараметр; подбор: GridSearch, RandomSearch, AutoML}
+
+{\small Ridge:} $\textrb{MSE} + L_2$
+
+{\small LASSO:} $\textrb{MSE} + L_1$ {\small зануляет часть весов}
+
+$\uparrow$ {\small зачем занулять часть весов?\\
+(1) накидали в признаки все подряд\\
+(2) ускорение модели\\
+(3)} $\ell << d$
+
+{\small регуляризация ведет себя неадекватно при немасштабируемых признаках}
+
+{\small регуляризация ускоряет } $\textrb{GD}$, {\small т.к. упрощает рельеф } $Q(w)$
+\end{block} 
+
+\begin{block}{Линейная классификация}
+
+$\mathbb{Y} = \{-1, +1\}$ - {\small бинарная классификация}
+
+$a(x) = \text{sign} \left<w, x\right>$ - {\small лин. модель классификации}
+
+$\left<w, x\right> = 0$ - {\small ур. гиперпл-ти}\\
+$w$ - {\small вектор нормали => лин. классиф. разделяет классы гиперпл-тью}\\
+$\left|\left<w, x\right>\right|$ {\small характеризует уверенность модели}
+\[Q(a) = \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} [a(x_i) \ne y_i] = \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} [y_i\left<w, x_i\right> < 0]\]
+$M_i = y_i\left<w, x_i\right>$ - {\small отступ (margin)}
+
+$L(M) = [M < 0]$ - {\small функция потерь (недифф) => заменяем на дифф. верхнюю оценку } $\tilde{L}$
+% $\tilde{L}_1(M) = \text{max} (0, 1 - M)$ - {\small hinge loss (позв. доп. регуляриз.)}\\
+% $\tilde{L}_2(M) = \log (1 + exp(-M))$ - {\small логистическая ф.п. (позв. оц. вер-ти)}
+\[\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} \left(\tilde{L}(y_i \left<w, x_i\right>) + \alpha R(w) \right) \to \min_{w}\]
+\end{block}
+
+\begin{block}{Метрики качества классификации}
+$\textrb{Accuracy}:$
+\[\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} [a(x_i) = y_i]\]
+$\ominus$ {\small дисбаланс классов}\\
+{\small Матрица ошибок}\\
+\begin{table}[]
+\begin{tabular}{l|c|c}
+  & $y = +1$ & $y = -1$ \\
+  \hline
+$a(x) = +1$ & $\textrb{TP}$  & $\textrb{FP}$ \\
+\hline
+$a(x) = -1$ & $\textrb{FN}$  &  $\textrb{TN}$
+\end{tabular}
+\end{table}
+\end{block}
+\end{column}
+
+\separatorcolumn
+
+\begin{column}{\colwidth}
+\[Accuracy = \frac{\textrb{TP} + \textrb{TN}}{\textrb{TP} + \textrb{TN} + \textrb{FP} + \textrb{FN}}\]
+\[pricision = \frac{\textrb{TP}}{\textrb{TP} + \textrb{FP}}\]
+{\small какая доля объектов, про которые модель сказала, что они полож., действительно явл-ся полож.}
+\[recall = \frac{\textrb{TP}}{\textrb{TP} + \textrb{FN}}\]
+{\small какую долю полож. объектов модель покрыла}
+
+$a(x) = \text{sign} b(x), \quad b(x) = \left<w, x\right>$\\
+{\small точность и полноту регулируют выбором порога } $t\limits_{\text{гиперпарам.}}:$\\
+$a(x) = \text{sign}(b(x) - t)$\\
+{\small порог подбирается после обуч. модели (фикс. веса)}\\
+\hrulefill
+\[F_1 \; score = \frac{2 \cdot precision \cdot recall}{precision + recall}\]
+$\oplus$ {\small устойчива к дисбалансу классов}
+
+
+\begin{block}{Метрики качества ранжирования}
+
+$a(x) = \text{sign} (b(x) - t), \quad b(x) = \left<w, x\right>$ - {\small уверенность в +1}
+{\small отсортируем по } $b(x)$ {\small }
+
+\underline{$\textrb{ROC}$ - {\small кривая}:}
+\[\textrb{FPR} = \frac{\textrb{FP}}{\textrb{FP} + \textrb{TN}} = \frac{\textrb{FP}}{\ell_{-}} ; \quad \textrb{TPR} = \frac{\textrb{TP}}{\textrb{TP} + \textrb{FN}} = \frac{\textrb{TP}}{\ell_{+}} = recall\]
+{\small перебираем все пороги } $t$ {\small и рисуем соотв. } $\textrb{TPR}$ {\small и } $\textrb{FPR}$ {\small на графике}\\
+$\textrb{AUC-ROC}$ - {\small площать под кривой}\\
+$\ominus$ {\small чувствителен к размерам классов:}\\
+$\left.
+  \begin{array}{c}
+     -1 \\
+     -1 \\
+  \end{array}
+\right]$ {\small сложные объекты отр. класса}\\
+$\left.
+  \begin{array}{c}
+     +1 \\
+     \cdots \\
+     +1
+  \end{array}
+\right]$ {\small полож. класс}\\
+$\left.
+  \begin{array}{c}
+     -1 \\
+     \cdots \\
+     -1
+  \end{array}
+\right]$ {\small много "легких" объектов отр. класса}\\
+{\small тогда } $\textrb{AUC-ROC}$ {\small будет } $\to 1$
+
+\underline{$\textrb{PR}$ - {\small кривая}:}\\
+{\small по осям } $precision$ {\small и } $recall$\\
+$\textrb{AUC-PRC}$ - {\small площадь под кривой}\\
+$\oplus$ {\small лучше учитывает дисбаланс}
+
+\underline{{\small Индекс Джини}:}\\
+$Gini = 2 \cdot \textrb{AUC-ROC} - 1 \quad$ {\small (улучшение отн. случайной модели)} 
+\end{block}
+
+\begin{block}{Логистическая регрессия (LR)}
+$\tilde{L}(M) = \log (1 + exp(-M))$ - {\small логистическая ф.п. (позв. оц. вер-ти)}
+
+$b(x) = \sigma (\left<w, x\right>)$ - {\small выдает вер-ть полож. класса }\\
+$b(x)$ {\small корректно оц. вер-ть, если при } $p, \;  x \in \mathbb{X} : b(x) = p$ {\small доля полож. объектов среди таких } $x \; = \; p$:
+\[argmin\limits_{b \in [0, 1]} \; \frac{1}{n} \sum\limits_{i = 1}^n L(y_i, b) = \frac{1}{n} \sum\limits_{i = 1}^n [y_i = +1]\]
+$n \to \infty$
+\[argmin\limits_{b \in [0,1]} \; \mathbb{E} (L(y, b) | x) = p(y = +1 | x) \quad \forall x \in \mathbb{X} \; (*)\]
+$(*)$ - {\small требование на корр. оц. вер-ти}
+
+{\small пусть } $y_i$ - {\small сл. вел. распр. Бернулли,} $\quad b(x_i)$ - {\small оц. вер-ть } $p(y_i = +1| x)$\\
+{\small метод. макс. правдоп.:}
+\[\prod\limits_{i = 1}^{\ell} b(x_i)^{[y_i = +1]} (1 - b(x_i))^{[y_i = -1]} \to \max\limits_{b}\]
+\[ -\sum\limits_{i = 1}^{\ell} \underbrace{\left([y_i = +1] \log b(x_i) + [y_i = -1] \log (1 - b(x_i))\right)}_{log-loss \; | \; cross-entropy \; loss} \to \min\limits_{b}\]
+\end{block}
+\end{column}
+
+\separatorcolumn
+
+\begin{column}{\colwidth}
+$(*)$ {\small выполняется для } $log-loss$
+\[-\sum\limits_{i = 1}^{\ell} \underbrace{\log\left(1 + \exp (-y_i \left<w, x_i\right>)\right)}_{\text{логистическая ф-я потерь}} \to \min\limits_{w}\]
+\begin{block}{Метод опорных векторов (SVM)}
+$L(M) = \max(0, 1 - M)$ - {\small hinge loss (позв. доп. регуляриз.)}
+
+\underline{{\small (1) Линейно разделимый случай}}
+
+$\exists w: \; y_i \left<w, x_i\right> > 0 \; \forall x_i \in \mathbb{X}$\\
+$a(x) = \text{sign}(\left<w, x\right> + w_0) =\limits_{\alpha > 0}^{} \text{sign} (\left< \alpha w, x\right> + \alpha w_0)$\\
+$\min\limits_{x_i \in \mathbb{X}} \; \left|\left<w, x_i\right> + w_0\right| = 1 \;$ {\small можно добиться масштабир., далее считаем, что это выполнено}
+\[\rho (a, x) = \frac{\left| \left<w, x\right> + w_0 \right|}{||w||} - \text{\small расст-е от гиперпл. } a \; \text{\small до } x\]
+\[\min\limits_{x_i \in \mathbb{X}} \; \rho(a, x_i) = \min\limits_{x_i \in \mathbb{X}} \; \frac{\left| \left<w, x_i\right> + w_0 \right|}{||w||} = \frac{1}{||w||} \cdot \underbrace{\min\limits_{x_i \in \mathbb{X}} \; \left| \left<w, x_i\right> + w_0 \right|}_{= 1} \]
+\[\min\limits_{x_i \in \mathbb{X}} \; \rho(a, x_i) = \frac{1}{||w||}\]
+\[\Rightarrow \; \text{\small задача }
+ \begin{cases}
+   \displaystyle{\frac{1}{||w||}} \to \max\limits_{w}\\
+   \min\limits_{x_i \in \mathbb{X}} \left| \left<w, x_i\right> + w_0 \right| = 1 \\
+   y_i (\left<w, x_i\right> + w_0) > 0 \quad i = 1, \cdots \ell
+ \end{cases}\]
+\[
+ \underbrace{\begin{cases}
+   ||w|| \to \min\limits_{w}\\
+   y_i (\left<w, x_i\right> + w_0) \ge 1 \quad i = 1, \cdots \ell
+ \end{cases}}_{\text{\small задача SVM для лин. разделимого случая}}\]
+ \underline{{\small (2) Линейно НЕразделимый случай}}
+ \[
+\begin{cases}
+   \displaystyle{\frac{1}{2}}||w||^2 + \mathcal{C} \sum\limits_{i = 1}^{\ell} \xi_i \to \min\limits_{w, w_0, \xi_i}\\
+   y_i (\left<w, x_i\right> + w_0) \ge 1 - \xi_i\\
+   \xi_i \ge 0
+ \end{cases}\]
+ \[\underbrace{\frac{1}{2} ||w||^2}_{\text{регуляриз.}} + \matchcal{C} \underbrace{\sum\limits_{i = 1}^{\ell} \max(0, 1 - y_i (\left<w, x_i\right> + w_0))}_{\text{функ-л ошибки } L(y, z) = \max(0, 1 - yz)} \to \min\limits_{w, w_0} \]
+ {\small отличия SVM и LR:\\
+ 1. SVM достаточно } $M \ge 1;$ {\small лучше знач-я } $\mathrb{AUC-ROC}, \; F_1 \; score$\\
+ {\small
+ 2. LR хочет } $M \to +\infty;$ {\small но корр. вер-ти}
+\end{block}
+
+\begin{block}{Многоклассовая классификация}
+
+$\mathbb{Y} = \{ 1, \cdots, K\}$
+\begin{enumerate}
+    \item one-vs-all
+
+$b_k(x) = \left< w_k, x \right> + w_{0k} \quad \quad X_k = ( x_i, [y_i = k] )_{i = 1}^{\ell}$
+
+$a(x) = argmax \limits_{k = 1, \cdots K} \; b_k(x)$
+
+$\ominus$ {\small много параметров}
+
+$\ominus \; \; b_k$ {\small не знают друг про друга при обучении}
+
+    \item all-vs-all
+
+$C_k^2$ {\small классификаторов}
+
+$a_{ij}(x)$ {\small обучается на } $X_{ij} = \{ (x_n, y_n) \; | \; y_n \in \{i, j\}\}$ 
+
+$a(x) = argmax \limits_{k = 1, \cdots K} \; \sum\limits_{j \ne k} [a_{kj}(x) = k]$
+
+$\ominus$ {\small неоднозначности}
+
+$\ominus \;  \sim K^2$ {\small классификаторов}
+
+    \item {\small Многоклассовая лог. регрессия}
+
+$b_k(x) = \left< w_k, x \right> + w_{0k} \quad \quad  x \to (b_1(x), \cdots, b_K(x))$
+\[SoftMax(z_1, \cdots, z_K) = \left( \frac{e^{z_1}}{\sum\limits_{k} e^{z_k}} , \cdots , \frac{e^{z_K}}{\sum\limits_{k} e^{z_k}} \right)\]
+\end{enumerate}
+\end{block}
+\end{column}
+\separatorcolumn
+\end{columns}
+\end{frame}
+\begin{frame}[t]
+\begin{columns}[t]
+\separatorcolumn
+\begin{column}{\colwidth}
+\[\mathbb{P}(y = k \; | \; x) = \frac{exp(\left< w_k, x\right> + w_{0k})}{\sum\limits_{j} exp(\left< w_j, x\right> + w_{0j})}\]
+\[\sum\limits_{i = 1}^{\ell} \log \mathbb{P} (y = y_i \; | \; x_i ) \to \max\]
+{\small для каждого объекта максимизируем соотв. компоненту в софтмаксе}
+
+\begin{block}{Метрики качества многоклассовой классиф.}
+$k$ {\small - й класс: } $\mathrb{TP}_k, \mathrb{FP}_k, \mathrb{FN}_k, \mathrb{TN}_k$
+\begin{columns}
+\begin{column}{0.12\paperwidth}
+{\small \underline{Микро - усреднение}}
+
+\begin{enumerate}
+    \item $\displaystyle{\overline{\mathrb{TP}} = \frac{1}{K} \sum\limits_{k = 1}^K \mathrb{TP}_k}$
+    \item $\displaystyle{precision = \frac{\overline{\mathrb{TP}}}{\overline{\mathrb{TP}} + \overline{\mathrb{FP}}}}$
+\end{enumerate}
+{\small обр. внимание на большие классы}
+\end{column}
+
+\begin{column}{0.12\paperwidth}
+{\small \underline{Макро - усреднение}}
+\begin{enumerate}
+    \item $\displaystyle{precision_k = \frac{\mathrb{TP}_k}{\mathrb{TP}_k + \mathrb{FP}_k}}$
+    \item $\displaystyle{precision = \frac{1}{K} \sum\limits_{k = 1}^K precision_k}$
+\end{enumerate}
+{\small все классы дают равный вклад}
+\end{column}
+\end{columns}
+\end{block}
+\begin{block}{Классиф. с пересекающимися классами}
+
+$\mathbb{Y} = \{0, 1\}^K \quad \quad \mathrb{binary - relevance}$
+
+$b_k(x)$ {\small учим на } $(x_i, y_{ik})_{i = 1}^{\ell}$
+
+$\ominus$ {\small теряем взаимосвязь между классами}
+\end{block}
+\begin{block}{Решающие деревья}
+
+{\small Решающее дерево - бинарное дерево, где}
+\begin{enumerate}
+    \item $v$ - {\small внутренняя вершина } $\Rightarrow \; \beta_v: \; \mathbb{X} \to \{0, 1\}$ - {\small предикат}
+
+$\beta_v(x) = [x_j \ge t]$
+
+$\beta_v(x) = [\left< w, x \right> \ge t]$
+
+$\beta_v(x) = [\rho(x, x_0) \ge t]$
+    \item $v$ - {\small лист } $\Rightarrow \; c_v \in \mathbb{Y}$ - {\small прогноз}
+\end{enumerate}
+{\small \underline{Критерии информативности}:}
+
+$H(R) - impurity$ {\small (хаотичность), показывает разнородность ответов в } $R$
+\[Q(R_m, j, t) = H(R_m) - \frac{|R_l|}{|R_m|} \cdot H(R_l) - \frac{|R_r|}{|R_m|} \cdot H(R_r) \to \max\]
+\[H(R) = \min\limits_{c \in \mathbb{Y}} \frac{1}{|R|} \sum\limits_{(x_i, y_i) \in R} L(y_i, c)\]
+$H(R)$ - {\small ошибка лучшего константного предсказания}
+
+{\small \underline{Обработка пропусков}:}
+\begin{itemize}
+    \item {\small в } $R$ {\small у признака } $j$ {\small есть пропуски}
+
+{\small пусть } $V_j(R)$ - {\small объекты, у которых } $x_j$ {\small неизв.}
+\[Q(R, j, t) = \frac{|R \textbackslash V_j(R)|}{|R|} \cdot Q(R \textbackslash V_j(R), j, t)\]
+{\small объекты с пропусками отправляются и влево и вправо с весами}
+
+    \item {\small суррогатные предикаты}
+
+{\small выбираем лучший предикат без учета пропусков } $\to$ {\small ищем неск. сурр. пред. (делают близкие разбиения) } $\to \; \; \beta(x), \beta ' (x), \beta '' (x), \cdots$ 
+\end{itemize}
+
+{\small \underline{Работа с катег. признаками}:}
+
+$x_j$ - {\small катег. признак, } $x_j \in Q = \{u_1, \cdots, u_q \}$
+
+{\small тривиальный вар. (multi-way splits) - разбиваем вершину на } $q$ {\small дочерних}
+
+$\ominus$ {\small переобучение}
+
+{\small вар. получше: } $Q = Q_1 \sqcup Q_2 \quad \beta(x) = [x_j \in Q_1]$
+
+$R_m(u) = \{ (x, y) \in R_m \; | \; x_j = u \},$
+
+$N_m(u) = |R_m(u)|, \quad \quad \mathbb{Y} = \{ -1, +1 \}$
+
+\end{block}
+\end{column}
+\separatorcolumn
+
+\begin{column}{\colwidth}
+\[
+\frac{1}{N_m(u_{(1)})} \sum\limits_{x_i \in R_m(u_{(1)})} [y_i = +1] \le \cdots \le \frac{1}{N_m(u_{(q)})} \sum\limits_{x_i \in R_m(u_{(q)})} [y_i = +1]
+\]
+{\small упорядочили катег. по доле полож. объектов внутри каждой катег.}
+{\small утверждается, что если искать разбиение только в таком порядке } $u_{(1)}, u_{(2)}, \cdots, u_{(q)},$ {\small то среди них гарантированно будет разбиение с лучшим улучшением критерия Джини}
+
+{\small \underline{Связь реш. деревьев и лин. моделей}:}
+
+$\mathbb{X} = J_1 \sqcup \cdots \sqcup J_n \quad \quad w_1, \cdots, w_n$ - {\small прогнозы}
+
+$a(x) = \sum\limits_{j = 1}^n w_j [x \in J_j]$
+\begin{block}{Ансамблирование моделей}
+
+$X = (x_i, y_i)_{i = 1}^{\ell}, \quad \quad y \in \mathbb{R}$\\
+{\small бутстрап: генерация подвыборки из } $X$ {\small выбором } $\ell$ {\small объектов с возвращ.}
+
+$X \to X_1, \codts, X_N \quad \quad b_1(x), \cdots, b_N(x)$ - {\small модели}
+
+$\left.
+  \begin{array}{c}
+    y(x) - \text{\small истинные ответы}\\
+    p(x) - \text{\small плотность на } \mathbb{X}\\
+  \end{array}
+\right\}$ - {\small предпол. что знаем}
+\[\mathcal{E}_j (x) = b_j(x) - y(x) \quad \text{\small ошибка модели}\]
+\[\mathbb{E} (b_j(x) - y(x))^2 = \mathbb{E} \mathcal{E}_j^2(x) = E_1\]
+$\left.
+  \begin{array}{c}
+    \mathbb{E} \mathcal{E}_j(x) = 0 - \text{\small ошибки несмещенные}\\
+    \mathbb{E} \mathcal{E}_i(x) \cdot \mathcal{E}_j(x) = 0, \; i \ne j  - \text{\small некорр. ошибок}\\
+  \end{array}
+\right\}$ - {\small предпол.}
+
+$a(x) = \displaystyle{\frac{1}{N} \sum\limits_{j = 1}^N b_j(x)}$
+\[\mathbb{E} \left( \frac{1}{N} \sum\limits_{j = 1}^N b_j(x) - y(x) \right)^2 = \mathbb{E} \left( \frac{1}{N} \sum\limits_{j = 1}^N b_j(x) - \frac{1}{N} \sum\limits_{j = 1}^N y(x) \right)^2 =\]
+\[= \mathbb{E} \left( \frac{1}{N} \sum\limits_{j = 1}^N \mathcal{E}_j(x)\right)^2 = \frac{1}{N^2} \mathbb{E} \left( \sum\limits_{j = 1}^N \mathcal{E}_j^2(x) + \sum\limits_{i \ne j} \underbrace{\mathcal{E}_i(x) \mathcal{E}_j(x)}_{= 0} \right) =\]
+\[= \frac{1}{N^2} \sum\limits_{j = 1}^N \underbrace{\mathbb{E} \mathcal{E}_j^2(x)}_{= E_1} = \frac{1}{N} E_1\]
+{\small усред. } $N$ {\small моделей уменьш. матож. ошибки в } $N$ {\small раз}    
+\end{block}
+\begin{block}{Bias-Variance decomposition}
+
+$X = (x_i, y_i)_{i = 1}^{\ell}, \quad \quad y \in \mathbb{R}$
+
+{\small задана плотность }$p(x, y)$ {\small на } $\mathbb{X} \times \mathbb{Y}$
+
+$L(y, a) = (y - a(x))^2$
+
+{\small \underline{среднеквадратичный риск}:}
+\[R(a) = \mathbb{E}_{x, y} (y - a(x))^2 = \int\limits_{\mathbb{X}} \int\limits_{\mathbb{Y}} (y - a(x))^2 \cdot p(x, y) dx dy\]
+\[a_{*}(x) = \mathbb{E}(y \; | \; x) = \int\limits_{\mathbb{Y}} y \cdot p(y \; | \; x) dy\]
+{\small \underline{метод обучения}: } $\mu: \underbrace{(\mathbb{X} \times \mathbb{Y})^{\ell}}_{\text{\small пр-во обуч. выборок}} \to \underbrace{\mathcal{A}}_{\text{\small семейство моделей}}$
+\[L(\mu) = \mathbb{E}_{X} \mathbb{E}_{x, y} (y - \mu(X)(x))^2 \; - \; \text{\small ошибка метода обучения}\]
+\[L(\mu) = \underbrace{\mathbb{E}_{x, y} \left( (y - \underbrace{\mathbb{E}(y \; | \; x)}_{\text{\small лучшая модель}})^2 \right)}_{\text{\small шум (noise) - ош. лучшей модели (ниж. гран. на ош. модели) }} + \]
+\[ + \underbrace{\mathbb{E}_{x} \left( (\underbrace{\mathbb{E}_{X} \mu(X)}_{\text{\small средняя модель по всем } X} - \mathbb{E} (y \; | \; x))^2 \right)}_{\text{\small смещение (bias) - отклон. сред. модели от идеальной }} + \]
+\end{block}
+\end{column}
+\separatorcolumn
+\begin{column}{\colwidth}
+\[ + \underbrace{\mathbb{E}_x \mathbb{E}_{X} \left( \mu(X) - \mathbb{E}_{X} \mu(X)\right)^2}_{\text{\small разброс (variance) - показатель устойчив. / переобуч. метода обуч.}}\]
+{\small лин. модель - } $bias \uparrow, \; variance \downarrow$
+
+{\small глубокое дерево - } $bias \downarrow, \; variance \uparrow$
+
+\begin{block}{Бэггинг}
+
+$\mu(X)$ - {\small метод обучения} $\quad \tilde{X}$ - {\small случ. подвыборка (бутстрап)}
+
+$b_1(x) = \mu(\tilde{X}_1), \cdots , b_N(x) = \mu(\tilde{X}_N)$ - {\small базовые модели}
+
+$\displaystyle{a_N(x) = \frac{1}{N} \sum\limits_{n = 1}^N b_n(x) = \frac{1}{N} \sum\limits_{n = 1}^N \mu(\tilde{X}_n)}$ - {\small композиция (бэггинг)}
+
+$bias(a_N) = bias(b_n) \; \forall n \; \Rightarrow$ {\small если } $b_i$ {\small слабые, то } $a_N$ {\small тоже будет слабой } $\Rightarrow \; b_n(x)$ {\small должны быть посложнее}
+
+$\displaystyle{var(a_N) = \frac{1}{N} var(b_n) + \frac{N(N - 1)}{N^2} \cdot cov(b_n(x), b_m(x)) \Rightarrow}$ {\small чем менее}
+\\
+{\small скоррелированы } $b_i,$ {\small тем лучше}
+\end{block}
+
+\begin{block}{Случайный лес (Random Forest)}
+
+\begin{enumerate}
+    \item {\small деревья обуч. почти до конца (напр. min\_samples\_leaf = 3)}
+    \item {\small деревья обуч. на бутстрап. подвыборках}
+    \item {\small в каждой вершине в предикате } $[x_j \ge t] \; \; j$ {\small выбирается из случ. } $\underbrace{\text{\small подмн-ва признаков}}_{\text{свое в каждой вершине}}$ {\small размера } $k$
+\end{enumerate}
+
+{\small классиф.: } $k = \lfloor \sqrt{d} \rfloor $
+
+{\small регрессия: } $k =  \lfloor d \diagup 3 \rfloor  $
+
+{\small RF - самый универс. метод в ML, }{\small гиперпарам-ры: } $N$ 
+
+{\small при росте } $N$ {\small RF не переобуч., ошибка выходит на ассимптоту}
+
+$\ominus$ {\small долго обучается}\\
+$\ominus$ {\small если } $bias(b_n) >> 0,$ {\small то RF будет плох}
+
+\underline{\small out-of-bag:}
+
+$b_n(x)$ {\small обуч. на } $X_n \subset X$
+\[\mathrb{OOB} = \frac{1}{\ell} \sum\limits_{i = 1}^{\ell} L \left( y_i, \underbrace{\frac{1}{\sum\limits_{n = 1}^N [x_i \notin X_n]}\sum\limits_{n = 1}^N [x_i \notin X_n] b_n(x_i)}_{\text{\small прогноз для } x_i \; \text{\small по деревьям, кот-е на нем не обуч.}} \right) \]
+$\oplus$ {\small неплохо аппрокс. } $\mathrb{LOO}$ {\small ошибку (кросс-вал. с } $k = \ell)$ 
+
+\underline{\small (перестановочная) важность признаков:}
+
+$a(x)$ - {small модель,} $\quad Q(a, X_{test}) = Q_{test}$
+
+{\small в } $X_{test}$ {\small рандомно перемеш. столбец } $j \to X_{test}^j, \quad Q(a, X_{test}^j) = Q_{test}^j$
+
+{\small важн. } $j$ {\small признака:} $Q_{test}^j - Q_{test} = q_j = \begin{cases}
+   \sim 0 \Rightarrow \text{\small неважный}\\
+   >> 0 \Rightarrow \text{\small важный}
+ \end{cases}$
+\end{block}
+
+\begin{block}{Градиентный бустинг (GB)}
+
+{\small каждая след. модель коррект. ошибки предыдущих}
+\begin{itemize}
+    \item {\small бустинг для регрессии}
+
+$\displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} (a(x_i) - y_i)^2 \to \min\limits_{a}}$
+
+$a_N(x) = \sum\limits_{n = 1}^N \gamma_n b_n(x), \; \; \gamma_n \in \mathbb{R}$
+
+$b_1(x) : \; \; \displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} (b_1(x_i) - y_i)^2 \to \min\limits_{b_1}}, \;\; \gamma_1 = 1$
+\end{itemize}    
+\end{block}
+\end{column}
+
+\separatorcolumn
+
+\begin{column}{\colwidth}
+
+$b_2(x) : \; \; b_2(x_i) = y_i - b_1(x_i) = s_i, \quad \displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} (b_2(x_i) - s_i)^2 \to \min\limits_{b_2}},$
+
+$ \gamma_2 = argmin\limits_{\gamma \in \mathbb{R}} \; \displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} (b_1(x_i) + \gamma b_2(x_i) - y_i)^2}$
+
+$b_3(x) : \; \; s_i = y_i - \gamma_1 b_1(x_i) - \gamma_2 b_2(x_i), \quad \displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} (b_3(x_i) - s_i)^2 \to \min\limits_{b_3}} \quad \quad $ {\small и т.д.}
+
+{\small GB переобуч. } $\Rightarrow$ {\small нужен} $X_{test}$
+\begin{itemize}
+    \item {\small общий случай}
+
+$L(y, z)$ - {\small дифф. функ. потерь} $\quad a_N(x) = \sum\limits_{n = 1}^N \underbrace{\xcancel{\gamma_n}}_{\bigstar} b_n(x)$
+
+$b_1(x): \;\; \displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} L(y_i, b_1(x_i))} \to \min\limits_{b_1}$
+
+$b_N(x): \; \; b_1(x), \cdots, b_{N - 1}(x)$ - {\small фикс.}
+
+$\displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} L(y_i, a_{N - 1}(x_i) + b_N(x_i)) \to \min\limits_{b_N}}$
+
+{\small рассмотрим} $L(y_i, a_{N - 1}(x_i) + z):$
+
+\begin{center}
+$
+\left.
+  \begin{array}{c}
+    \displaystyle{s_i := - \left.\frac{\partial}{\partial z}  L(y_i, z) \right|_{z = a_{N-1}(x_i)}} \; \; - \; \text{\small сдвиг} \\
+    \displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} (b_N(x_i) - s_i)^2 \to \min\limits_{b_N}} \\
+    a_N(x) = a_{N-1}(x) + b_N(x) \\
+  \end{array}
+\right]$ - {\small GB}
+\end{center}
+
+$Q(z_1, \cdots, z_{\ell}) = \displaystyle{\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} L(y_i, a_{N - 1}(x_i) + z_i) \to \min\limits_{z_1, \cdots, z_{\ell}}}$
+
+$(s_1, \cdots, s_{\ell}) = \nabla_{z} Q(z_1, \cdots, z_{\ell})$
+
+{\small базовая модель имитирует 1 шаг градиентного спуска}
+
+{\small GB - град. спуск в простр-ве прогнозов композиции на обуч. выборке}
+
+{\small \underline{нельзя} взять } $b_1(x)$ {\small и прибавл. на каждом шаге } $a_{N - 1}(x) + s_i, \;$ {\small потому что неясно как быть с новыми объектами} 
+\end{itemize}
+\underline{\small Регуляризация:}
+
+{\small можно показать (эксперим.), что в бустинге:}
+\begin{table}[]
+\begin{tabular}{l|с|с}
+  &  {\small бэггинг} & {\small бустинг} \\
+\hline
+$bias$ &  $-$ & $\downarrow$  \\
+\hline
+$variance$ & $\downarrow$  &  $\uparrow$  \\
+\end{tabular}
+\end{table}
+$\Rightarrow$ {\small базовые модели в бустинге - простое + непереобуч. - неглуб. деревья}
+
+$\ominus$ {\small если базов. модели простые, качество так себе, могут испортить композицию}
+
+$\ominus$ {\small если базов. модели сложные, есть риск моментального переобуч.}
+
+$\Rightarrow \; \; b_N(x)$ {\small нельзя доверять}
+
+\underline{\small Сокращение шага:}
+
+$a_N(x) = a_{N - 1}(x) + \eta b_N(x), \;\; \eta \in (0, 1]$ - {\small гиперпарам.}
+
+{\small чем меньше } $\eta,$ {\small тем больше оптим. } $N$
+
+\underline{\small Стохастический GB:}
+
+{\small модели простые, а данные сложные}
+
+{\small идея: обучаем } $b_N(x)$ {\small на } $X_N \subset X$
+
+\underline{\small Функции потерь:}
+
+\begin{itemize}
+    \item {\small регрессия}
+
+$L(y, z) = (y - z)^2, \quad s_i = - \displaystyle{\left.\frac{\partial}{\partial z} L(y_i, z)\right|_{z = a_{N - 1}(x_i)}} = y_i - a_{N - 1}(x_i)$
+
+$L(y, z) = |y - z|, \quad s_i = - sign(a_{N - 1}(x_i) - y_i)$
+
+    \item {\small классиф.}
+
+$L(y, z) = \log (1 + \exp(- yz)), \; \; a_N(x) \in \mathbb{R}$
+\[\frac{1}{\ell} \sum\limits_{i = 1}^{\ell} \left( b_N(x_i) - \frac{y_i}{1 + \exp(y_i \cdot a_{N-1}(x_i))}\right)^2 \to \min\limits_{b_N}, \quad s_i = w_i \cdot y_i\]
+{\small если отступ } $y_i \cdot a_{N-1}(x_i) >> 0 \; \Rightarrow \; w_i \sim 0, \; s_i \sim 0 \; \Rightarrow$ {\small не трогаем} 
+
+$\underbrace{y_i \cdot a_{N-1}(x_i) << 0}_{\text{\small объект - выброс}} \; \Rightarrow \; w_i \sim 1, \; s_i \sim y_i \; \Rightarrow$ {\small стараемся скоррект.}
+
+{\small лог. функ-я потерь устойчива к выбросам}
+
+$y_i \cdot a_{N-1}(x_i) \sim 0 \; \Rightarrow \; w_i \sim 0.5, \; s_i \sim 0.5 y_i \; \Rightarrow$ {\small стараемся умеренно}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[t]
+\begin{columns}[t]
+\separatorcolumn
+\begin{column}{\colwidth}
+\begin{block}{Градиентный бустинг над деревьями (GBDT)}
+$b_n(x) = \sum\limits_{j = 1}^{J_n} b_{nj} [x \in R_{nj}]$
+\[a_N(x) = a_{N - 1}(x) + \sum\limits_{j = 1}^{J_N} b_{Nj} [x \in R_{Nj}] \]
+$\bigstar \;$ {\small переподберем } $b_{Nj}$ {\small с т. зр. исходн. ф.п. } $L(y, z):$
+\[\sum\limits_{i = 1}^{\ell} L\left(y_i, a_{N - 1}(x_i) + \sum\limits_{j = 1}^{J_N} \gamma_j [x \in R_{j}]\right) \to \min\limits_{\gamma_1, \cdots, \gamma_{J_N}}\]
+\[\sum\limits_{j = 1}^{J_N} \underbrace{\sum\limits_{(x_i, y_i) \in R_{Nj}} L(y_i, a_{N - 1}(x_i) + \gamma_j)}_{\text{\small суммы не пересек-ся}} \to \min\limits_{\gamma_1, \cdots, \gamma_{J_N}}\]
+{\small задача распадается на } $J_N$ {\small подзадач:}
+\[\sum\limits_{(x_i, y_i) \in R_{Nj}} L(y_i, a_{N - 1}(x_i) + \gamma) \to \min\limits_{\gamma}\]
+
+\begin{block}{Бустинг 2-го порядка}
+\[\sum\limits_{i = 1}^{\ell} \underbrace{L(y_i, a_{N - 1}(x_i) + b_N(x_i))}_{\text{\footnotesize разлож. в ряд Тейлора по 2-му арг. с центром в } a_{N - 1}(x_i)} \to \min\limits_{b_N}\]
+\[\sum\limits_{i = 1}^{\ell} \left( \underbrace{\xcancel{L(y_i, a_{N - 1}(x_i))}}_{\text{\footnotesize не зависит от } b_N} + \underbrace{\left.\frac{\partial L}{\partial z} (y_i, z)\right|_{z = a_{N - 1}(x_i)}}_{= -s_i} \cdot b_N(x_i)  + \right.\]
+\[ + \left. \underbrace{\left. \frac{1}{2}\frac{\partial^2 L}{\partial z^2} (y_i, z)\right|_{z = a_{N - 1}(x_i)}}_{= h_i} \cdot b_N^2(x_i) + \cdots \right) \to \min\limits_{b_N} \]
+\[\sum\limits_{i = 1}^{\ell} \left( - s_i b_N(x_i) + \frac{1}{2} \textcolor{mgr}{h_i} b_N^2(x_i) \right) \to \min\limits_{b_N}\]
+\[\sum\limits_{i = 1}^{\ell} (b_N(x_i) - s_i)^2 = \sum\limits_{i = 1}^{\ell} (b_N^2(x_i) - 2 s_i b_N(x_i) + \underbrace{\xcancel{s_i^2}}_{\text{\footnotesize не зависит от } b_N}) =\]
+\[= \xcancel{2} \sum\limits_{i = 1}^{\ell} \left(- s_i b_N(x_i) + \frac{1}{2} b_N^2(x_i) \right) \to \min\limits_{b_N} \]
+
+\begin{block}{Доп. регуляризации}
+
+$b(x) = \sum\limits_{j = 1}^J b_j [x \in R_j]$ - {\small базовая модель}
+
+$\left.
+  \begin{array}{c}
+    J \\
+     ||b||^2 = \sum\limits_{j = 1}^J b_j^2\\
+  \end{array}
+\right\}$ - {\small показатели сложности дерева}
+\[\sum\limits_{i = 1}^{\ell} \left( - s_i b_N(x_i) + \frac{1}{2} h_i b_N^2(x_i) \right) + \gamma J_N + \frac{\lambda}{2} \sum\limits_{j = 1}^{J_N} b_{Nj}^2 \to \min\limits_{b_N}\]
+\[\sum\limits_{j = 1}^{J_N} \left( \underbrace{\left(\underbrace{ -\sum\limits_{(x_i, y_i) \in R_{Nj}} s_i }_{= - S_j}\right) \cdot b_{Nj} + \frac{1}{2} \left( \underbrace{\sum\limits_{(x_i, y_i) \in R_{Nj}} h_i}_{= H_j} + \lambda\right) b_{Nj}^2 + \gamma}_{\text{\footnotesize кв. многочлен от } b_{Nj}} \right) \to \min\limits_{b_N}\]
+\end{block}
+\end{block}
+\end{block}
+\end{column}
+\separatorcolumn
+
+\begin{column}{\colwidth}
+\[b_{Nj}^{*} = \frac{S_j}{H_j + \lambda}\]
+{\small подставим:}
+\[\underbrace{-\frac{1}{2}\sum\limits_{j = 1}^{J_N} \frac{S_j^2}{H_j + \lambda} + \gamma J_N}_{\text{\footnotesize функ-л ошибки для дерева при опт. прогнозах в листьях}} = H(b_N) \]
+{\small будем использ. } $H(b)$ {\small для выбора предиката}
+\[Q(R, j, t) = H(R) - H(R_l) - H(R_r)\]
+$\oplus$ {\small критерий хаотичности, кот-й напр. завис. от функции потерь}
+
+\begin{block}{Стекинг}
+
+$a_N(x) = \sum\limits_{n = 1}^N \underbrace{\gamma_n(x)}_{\text{\footnotesize показ. компетент. } b_n(x) \; \text{\footnotesize в т.} x} b_n(x)$ - {\small mixture of experts}
+\\
+\hrulefill
+
+$b_1(x), \cdots, b_N(x)$ - {\small базовые модели (возм. из разных семейств)}
+
+$a(b_1(x), \cdots, b_N(x))$ - {\small метамодель}
+
+{\small если обучать } $a$ {\small и } $b_1, \cdots, b_N$ {\small на одних и тех же данных, то переобучимся}
+
+$X = X_1 \sqcup X_2 \sqcup \cdots \sqcup X_K$
+\[\sum\limits_{k = 1}^K \sum\limits_{(x_i, y_i) \in X_k} L(y_i, a(b_1^{-k}(x_i), \cdots, b_N^{-k}(x_i))) \to \min\limits_{a}\]
+$b_n^{-k}(x) \; - \; b_n$ {\small обуч. на } $X \textbackslash X_k$
+
+{\small когда обуч. метамодель на i-ом объекте берем те базовые модели, кот-е на i-ом объекте не обуч.}
+\end{block}
+\begin{block}{Обучение без учителя. Кластеризация}
+
+$X = (x_i)_{i = 1}^{\ell}$ - {\small обуч. выборка}
+
+$a : \; \mathbb{X} \to \{1, \cdots, K\}$ - {\small модель кластеризации}
+
+$x_i$ {\small и } $x_j$ {\small похожи } $\Leftrightarrow \; a(x_i) = a(x_j), \; \; K$ - {\small не знаем}
+
+\underline{\small Применения:}
+\begin{enumerate}
+    \item {\small разведочный анализ данных}
+    \item {\small генерация признаков (напр. расст. от объекта до центра кластера)}
+    \item {\small квантизация (дискретизация) признаков}
+\end{enumerate}
+\end{block}
+\begin{block}{Метрики качества кластеризации}
+
+{\small лучший способ - глазами}\\
+$\ominus$ {\small долго, за это деньги не платят =(}\\
+\hrulefill
+
+{\small Внутрикластерное расстояние}
+
+$c_k$ - {\small центр кластера } $k$
+\[\sum\limits_{k = 1}^K \sum\limits_{i = 1}^{\ell} [a(x_i) = k] \cdot \rho(x_i, c_k) \to \min \]
+{\small требует, чтобы кластеры были компактными}\\
+\hrulefill
+
+{\small Межкластерное расстояние}
+\[\sum\limits_{i \ne j} [a(x_i) \ne a(x_j)] \cdot \rho(x_i, x_j) \to \max\]
+\hrulefill
+
+{\small Индекс Данна (Dunn Index)}
+
+$d(k, k')$ - {\small расст. м/у кластерами } $k$ {\small и } $k'$
+
+$d(k)$ - {\small внутрикласт. расст. для кластера } $k$
+\[\frac{\min\limits_{1 \le k < k' \le K} d(k, k')}{\max\limits_{1 \le k \le K} d(k)} \to \max \]
+\end{block}
+\end{column}
+\separatorcolumn
+\begin{column}{\colwidth}
+\begin{block}{Метрические методы}
+$\rho(x, z)$ - {\small какое-то расстояние м/у объектами}\\
+\hrulefill
+
+\underline{\small K-Means:}\\
+$K$ - {\small гиперпарам., оптим. внутрикласт. расст.:}
+\[\sum\limits_{k = 1}^K \sum\limits_{i = 1}^{\ell} [a(x_i) = k] \cdot \rho(x_i, c_k) \to \min \]
+{\small идея: поочередно оптим. по } $a(x)$ {\small и по } $c_k$:\\
+\textcolor{mgr}{\small (0)} {\small иниц. центры кластеров (напр. k-means++)}\\
+\textcolor{mgr}{\small (a)} {\small фикс. } $c_k, \quad \quad a(x_i) = argmin\limits_{k = 1, \cdots, K} \; \rho(x_i, c_k)$\\
+\textcolor{mgr}{\small (b)} {\small фикс. } $a(x_i), \quad \quad c_k = argmin\limits_{c \in \mathbb{X}} \; \sum\limits_{a(x_i) = k} \rho(x_i, c)$\\
+{\small повт. шаги \textcolor{mgr}{(a)} и \textcolor{mgr}{(b)} до сходимости (сх-ть гарантируется)}
+
+$\oplus$ {\small быстрый}\\
+$\oplus$ {\small легко распред-ся}\\
+$\ominus$ {\small зависит от иниц.}\\
+$\ominus$ {\small если признаки разн. масштаба, может выйти не то}\\
+$\ominus$ {\small предпол. слишком простую форму кластеров}  
+\end{block}
+\begin{block}{Плотностные методы}
+
+\underline{\small DBSCAN:}\\
+$\varepsilon, n$ - {\small гиперепарам.}\\
+{\small идея: в кластере все точки находятся плотно отн. друг друга}
+
+{\small Типы объектов:}
+\begin{enumerate}
+    \item {\small ядровые}\\
+$x$ - {\small ядровой, если } $\left|\{x_i \in X, \; x_i \ne x \; | \; \rho(x, x_i) < \varepsilon \}\right| \ge n$
+    \item {\small пограничные}\\
+$x$ - {\small пограничный, если он не ядровой, но в его } $\varepsilon$ {\small окр. есть } $\ge 1$ {\small ядровой}
+    \item {\small шумовые - все остальные}
+\end{enumerate}
+{\small Алгоритм:}\\
+$C = 0 \quad \quad \quad \quad \quad \; \; \;$ {\small \# число кластеров}\\
+$for \; x \in X:$\\
+$\quad \quad if \; a(x) \ne \emptyset: \quad $ {\small \# отнесен к какому-то кластеру}\\
+$\quad \quad \quad \quad continue$\\
+$\quad \quad N = \{x_i \in X, x \ne x_i \; | \; \rho(x_i,x) < \varepsilon \}$\\
+$\quad \quad if \; |N| < n:$\\
+$\quad \quad \quad \quad a(x) = noise$\\
+$\quad \quad \quad \quad continue$\\
+$\quad \quad C = C + 1$\\
+$\quad \quad a(x) = C$\\
+$\quad \quad for \; z \in N:$\\
+$\quad \quad \quad \quad if \; a(z) = noise:$\\
+$\quad \quad \quad \quad \quad \quad a(z) = C$\\
+$\quad \quad \quad \quad if \; a(z) \ne \emptyset:$\\
+$\quad \quad \quad \quad \quad \quad continue$\\
+$\quad \quad \quad \quad a(z) = C$\\
+$\quad \quad \quad \quad N' = \{x_i \in X, x_i \ne z \; | \; \rho(x_i, z) < \varepsilon \}$\\
+$\quad \quad \quad \quad if \; |N'| \ge n:$\\
+$\quad \quad \quad \quad \quad \quad N = N \cup N'$
+
+$\oplus$ {\small находит кластеры оч. сложной формы}\\
+$\oplus$ {\small находит выбросы}\\
+$\oplus$ {\small м.б. проще задать, чем число кластеров}\\
+$\ominus$ {\small медленно}\\
+$\ominus$ {\small работает плохо, если разная плотность в данных (OPTICS чинит)}
+\end{block}
+\begin{block}{Иерархическая кластеризация}
+
+{\small есть }$C^1 = \{\{x_1\}, \cdots, \{x_{\ell}\}\}$ - {\small каждый объект к своему кластеру}    
+\end{block}
+\end{column}
+\separatorcolumn
+\begin{column}{\colwidth}
+$d(X_m, X_n)$ - {\small мера близости кластеров}
+
+{\small пусть уже есть набор кластеров } $C^j = \{X_1, \cdots, X_{\ell - j + 1}\}$
+
+$(m, n) = argmin\limits_{1 \le m < n \le \ell - j + 1} \; d(X_m, X_n)$
+
+$C^{j + 1} = \left( C^j \textbackslash \{X_m, X_n\} \right) \cup \{X_m \cup X_n\} $
+
+$\cdots$
+
+$C^{\ell} = \{\{x_1, \cdots, x_{\ell}\}\}$
+\\
+\begin{center}
+{
+\begin{tikzpicture}
+\draw (0,0) -- (0,1) -- (2,1) -- (2, 0);
+\draw (1,1) -- (1,3) -- (4,3) -- (4, 0);
+\draw (2.5, 3) -- (2.5, 5) -- (8.5, 5) -- (8.5, 4);
+\draw (6, 0) -- (6, 2) -- (8, 2) -- (8, 0);
+\draw (7, 2) -- (7, 4) -- (10, 4) -- (10, 0);
+
+\node[below] at (0, 0) {$x_1$};
+\node[below] at (2, 0) {$x_2$};
+\node[below] at (10, 0) {$x_{\ell}$};
+\node[below] at (6, 0) {$\cdots$}
+
+\end{tikzpicture}
+}
+\end{center}
+
+\begin{block}{Визуализация}
+
+{\small Дано: } $X \in \mathbb{R}^{\ell \times d}$\\
+{\small Хотим: } $Z \in \mathbb{R}^{\ell \times 2},$ {\small которая похожа на } $X$
+
+{\small \textcolor{mgr}{(1)} Метод многомерного шкалирования (MDS)}
+
+{\small сохр. попарные расст.:}
+\[\sum\limits_{i = 1}^{\ell} \sum\limits_{j = i + 1}^{\ell} (\rho(x_i, x_j) - \rho(z_i, z_j))^2 \to \min\limits_{z_1, \cdots, z_{\ell} \in \mathbb{R}^2} \quad (*)\]
+{\small оптимиз. напрямую по } $z_i \in \mathbb{R}^2$
+
+$\ominus$ {\small заведомо наивная (нет хорошего решения)}
+
+{\small \textcolor{mgr}{(2)} t-SNE}
+
+{\small сохр. пропорции:} $\rho(x_i, x_j) = \alpha \rho(x_i, x_k) \; \Rightarrow \; \rho(z_i, z_j) = \alpha \rho(z_i, z_k)$
+
+{\small опишем } $x_j$ {\small через распр-е: } $\displaystyle{p(i \; | \; j) = \frac{\exp(- ||x_i - x_j||^2 / 2 \sigma_j^2)}{\sum\limits_{k \ne j} \exp(- ||x_k - x_j||^2 / 2 \sigma_j^2)}}$\\
+$\sigma_j^2 \to \infty \; \Rightarrow \; p(i \; | \; j)$ - {\small равномерное}\\
+$\sigma_j^2 \to 0 \; \Rightarrow \; p(i \; | \; j)$ - {\small вырожденное распр-е}\\
+$\sigma_j^2$ {\small подбираем так, чтобы } $2^{-\sum\limits_{i \ne j} p(i \; | \; j) \log p(i \; | \; j)} \in [5, 50]$ {\small (перплексия)}
+
+$\ominus \; p(m \; | \; j) \sim 0 \; \Rightarrow \; m$ {\small м.б. разместить случайно}
+
+{\small Симметризация:}
+
+$\displaystyle{p_{ij} = \frac{p(i \; | \; j) + p(j \; | \; i)}{2} \quad \Rightarrow \quad \sum\limits_{j} p_{ij} > \frac{1}{\ell}}$\\
+$\oplus$ {\small не будет объектов, располож. кот-х не важно }
+
+{\small опишем распр-е для } $z_1, \cdots, z_{\ell} \in \mathbb{R}^2:$\\
+{\small возьмем распр-е Коши: } $\displaystyle{q_{ij} = \frac{(1 + ||z_i - z_j||^2)^{-1}}{\sum\limits_{k \ne m} (1 + ||z_k - z_m||^2)^{-1}}}$
+
+{\small Дивергенция Кульбака-Лейблера:}
+\[D_{KL}(p \; || \; q) = \sum\limits_{i \ne j} p_{ij} \log \frac{p_{ij}}{q_{ij}} \to \min\limits_{z_1, \cdots, z_{\ell} \in \mathbb{R}^2}\]
+
+
+
+\end{block}
+
+\end{column}
+
+
+\end{columns}
+\end{frame}
+
+\end{document}
