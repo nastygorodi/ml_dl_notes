@@ -8,7 +8,7 @@ inputs:
   out_dir:
     description: 'Directory where to put the generated .pdf file'
     required: true
-    default: 'out'
+    default: 'out/ml1'
 runs:
   using: docker
   image: Dockerfile
