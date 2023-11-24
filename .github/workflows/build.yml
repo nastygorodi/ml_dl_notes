@@ -1,0 +1,31 @@
+name: Build pdf
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Compile .tex
+        uses: ./build
+        with:
+          filename: 'src/ml1.tex'
+          
+      - name: Commit compiled pdf files
+        if: success()
+        run: |
+          git add -f **.pdf
+          author=${GITHUB_ACTOR:=github-actions}
+          git config user.name "$author"
+          git config user.email "$author@users.noreply.github.com"
+          git commit --allow-empty -m "actualize pdf"
+          git push
+
+      - name: Deploy to github pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: out # The folder the action should deploy.
