@@ -13,7 +13,7 @@ jobs:
       - name: Compile .tex
         uses: ./build
         with:
-          filename: 'src/ml1.tex'
+          filename: 'src/ml1/ml1.tex'
           
       - name: Commit compiled pdf files
         if: success()
