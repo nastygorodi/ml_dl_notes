@@ -4,7 +4,7 @@ inputs:
   filename:
     description: 'path to the main .tex file'
     required: true
-    default: 'src/ml1.tex'
+    default: 'src/ml1/ml1.tex'
   out_dir:
     description: 'Directory where to put the generated .pdf file'
     required: true
