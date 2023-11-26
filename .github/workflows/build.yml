@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Compile .tex
-        uses: ./build
+        uses: ./build/ml1
         with:
           filename: 'src/ml1/ml1.tex'
           
