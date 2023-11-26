@@ -8,8 +8,8 @@ RUN dnf install -yv texlive-collection-basic    \
     'tex(tcolorbox.sty)'                        \
     'tex(parskip.sty)'
 
-WORKDIR /build
+WORKDIR /build/ml1
 
 COPY . .
 
-ENTRYPOINT ["bash", "build/build_ml1.sh"]
+ENTRYPOINT ["bash", "build/ml1/build_ml1.sh"]
