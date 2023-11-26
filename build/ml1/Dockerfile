@@ -8,7 +8,8 @@ RUN dnf install -yv texlive-collection-basic    \
     'tex(tcolorbox.sty)'                        \
     'tex(parskip.sty)'                          \
     'tex(beamer.cls)'                           \
-    'tex(luainputenc.sty)'
+    'tex(luainputenc.sty)'                      \
+    'tex(xetex-inputenc.sty)'
 
 WORKDIR /build/ml1
 
